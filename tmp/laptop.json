@@ -1,0 +1,51 @@
+{
+  "id":  "ff3d7e90-0865-428a-aa5f-e1d655671d52",
+  "brand":  "Apple",
+  "name":  "M2 Pro",
+  "cpu":  {
+    "brand":  "AMD",
+    "name":  "Ryzen 5",
+    "numberCores":  3,
+    "numberThreads":  7,
+    "minGhz":  2.6883489326156456,
+    "maxGhz":  3.463192919320138
+  },
+  "ram":  {
+    "value":  "36",
+    "unit":  "GIGABYTE"
+  },
+  "gpus":  [
+    {
+      "brand":  "AMD",
+      "name":  "Rx 5700-XT",
+      "minGhz":  1.4863761371438566,
+      "maxGhz":  1.9344214425853832,
+      "memory":  {
+        "value":  "2",
+        "unit":  "GIGABYTE"
+      }
+    }
+  ],
+  "storages":  [
+    {
+      "driver":  "HDD",
+      "memory":  {
+        "value":  "4",
+        "unit":  "TERABYTE"
+      }
+    },
+    {
+      "driver":  "SSD",
+      "memory":  {
+        "value":  "684",
+        "unit":  "GIGABYTE"
+      }
+    }
+  ],
+  "screen":  null,
+  "keyboard":  null,
+  "weightKg":  1.6250923503807262,
+  "priceUsd":  2067.021184768831,
+  "releaseYear":  2016,
+  "updatedAt":  "2026-07-10T17:31:19.270414700Z"
+}
