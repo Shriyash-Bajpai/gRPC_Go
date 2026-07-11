@@ -7,14 +7,16 @@ import (
 
 func ProtoToJSON(message proto.Message) (string, error) {
 
+	// encoder
 	marshaler := protojson.MarshalOptions{
-		Multiline:       true,
-		Indent:          "  ",
-		UseProtoNames:   false,
-		EmitUnpopulated: true,
+		Multiline:       true,  // print pretty json
+		Indent:          "  ",  // two spaces
+		UseProtoNames:   false, // true: user_id , false: userId
+		EmitUnpopulated: true,  // true means show default values
 		UseEnumNumbers:  false,
 	}
 
+	// Json serialization ie. proto mssg to message
 	data, err := marshaler.Marshal(message)
 	if err != nil {
 		return "", err

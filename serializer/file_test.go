@@ -10,6 +10,8 @@ import (
 )
 
 func TestFileSerializer(t *testing.T) {
+
+	// run diff test parallely
 	t.Parallel()
 
 	binaryFile := "../tmp/laptop.bin"
