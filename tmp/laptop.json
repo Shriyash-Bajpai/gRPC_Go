@@ -1,51 +1,51 @@
 {
-  "id":  "ff3d7e90-0865-428a-aa5f-e1d655671d52",
-  "brand":  "Apple",
-  "name":  "M2 Pro",
-  "cpu":  {
-    "brand":  "AMD",
-    "name":  "Ryzen 5",
-    "numberCores":  3,
-    "numberThreads":  7,
-    "minGhz":  2.6883489326156456,
-    "maxGhz":  3.463192919320138
+  "id": "9dd72e01-404a-4dc6-a438-908e1fe21939",
+  "brand": "Lenovo",
+  "name": "WorkPad",
+  "cpu": {
+    "brand": "AMD",
+    "name": "Ryzen 7",
+    "numberCores": 3,
+    "numberThreads": 4,
+    "minGhz": 2.7941450728243047,
+    "maxGhz": 3.2360432646897603
   },
-  "ram":  {
-    "value":  "36",
-    "unit":  "GIGABYTE"
+  "ram": {
+    "value": "32",
+    "unit": "GIGABYTE"
   },
-  "gpus":  [
+  "gpus": [
     {
-      "brand":  "AMD",
-      "name":  "Rx 5700-XT",
-      "minGhz":  1.4863761371438566,
-      "maxGhz":  1.9344214425853832,
-      "memory":  {
-        "value":  "2",
-        "unit":  "GIGABYTE"
+      "brand": "AMD",
+      "name": "Rx 580",
+      "minGhz": 1.1689274745649119,
+      "maxGhz": 1.5716697989473838,
+      "memory": {
+        "value": "3",
+        "unit": "GIGABYTE"
       }
     }
   ],
-  "storages":  [
+  "storages": [
     {
-      "driver":  "HDD",
-      "memory":  {
-        "value":  "4",
-        "unit":  "TERABYTE"
+      "driver": "HDD",
+      "memory": {
+        "value": "1",
+        "unit": "TERABYTE"
       }
     },
     {
-      "driver":  "SSD",
-      "memory":  {
-        "value":  "684",
-        "unit":  "GIGABYTE"
+      "driver": "SSD",
+      "memory": {
+        "value": "241",
+        "unit": "GIGABYTE"
       }
     }
   ],
-  "screen":  null,
-  "keyboard":  null,
-  "weightKg":  1.6250923503807262,
-  "priceUsd":  2067.021184768831,
-  "releaseYear":  2016,
-  "updatedAt":  "2026-07-10T17:31:19.270414700Z"
+  "screen": null,
+  "keyboard": null,
+  "weightKg": 2.317900655513305,
+  "priceUsd": 1706.238914910925,
+  "releaseYear": 2025,
+  "updatedAt": "2026-07-11T08:27:22.566112900Z"
 }
