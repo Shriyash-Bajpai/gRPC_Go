@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/Shriyash-Bajpai/gRPC_Go/pb"
 	"github.com/google/uuid"
@@ -39,6 +40,20 @@ func (server *LaptopServer) CreateLaptop(
 		}
 		laptop.Id = id.String()
 	}
+
+	// some heavy processing to test timeout
+	time.Sleep(6 * time.Second)
+
+	if err := ctx.Err(); err != nil {
+		log.Printf("ctx.Err() = %v", err)
+		return nil, status.Error(codes.DeadlineExceeded, err.Error())
+	}
+
+	//if ctx.Err() == context.DeadlineExceeded {
+	//	log.Print("deadline is exceeded")
+	//	return nil, status.Error(codes.DeadlineExceeded, "deadline is exceeded")
+	//}
+
 	// save the laptop to in memory storage
 	err := server.Store.Save(laptop)
 	if err != nil {
