@@ -13,13 +13,32 @@ option go_package="github.com/shriyash/grpc_practice/pb;pb";
 
 import "laptop_message.proto";
 
+// This is the IDL (Interface Definition Language) for service
+// Explains the data exchanged, RPC methods, the req and res formats
+// Type of formal agreement between the client and server
+
+
+// Defined the input to RPC
+// every RPC func accepts one req/mssg (no mult args)
+// defines the req sent by the client
 message CreateLaptopRequest{
   Laptop laptop=1;
 }
+
+// Defines what the server wil return
+// output of RPC server
 message CreateLaptopResponse{
   string id=1;
 }
+
+// Defines a general service
+// Interface that the server must implement
 service LaptopService{
+
+  // rpc declares a remote function that can be called over a network
+  // automatic serialize req, send over n/w, wait, deserialize
+  // This tells: the server provides func named CreateLaptop.
+  // We also mentioned the input/param of the func and the response type too.
   rpc CreateLaptop(CreateLaptopRequest)
       returns (CreateLaptopResponse){};
 }

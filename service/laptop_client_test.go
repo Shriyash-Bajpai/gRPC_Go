@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Integration Testing
+
 func TestClientCreateLaptop(t *testing.T) {
 	t.Parallel()
 

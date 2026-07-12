@@ -11,16 +11,22 @@ import (
 
 var ErrAlreadyExists = errors.New("record already exists")
 
+// Data Access Logic
+
+// Create the interface defining the storage.
+// Interface bcoz that we want to define methods too.
 type LaptopStore interface {
 	Save(laptop *pb.Laptop) error
 	Find(id string) (*pb.Laptop, error)
 }
 
+// In mem implementation of LaptopStore
 type InMemoryLaptopStore struct {
 	mutex sync.RWMutex
 	data  map[string]*pb.Laptop
 }
 
+// Constructor to create a new instance of InMemLapStore
 func NewInMemoryLaptopStore() *InMemoryLaptopStore {
 
 	return &InMemoryLaptopStore{
@@ -28,6 +34,7 @@ func NewInMemoryLaptopStore() *InMemoryLaptopStore {
 	}
 }
 
+// We need to implement the func defined in the interface above.
 func (store *InMemoryLaptopStore) Save(laptop *pb.Laptop) error {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
@@ -37,6 +44,7 @@ func (store *InMemoryLaptopStore) Save(laptop *pb.Laptop) error {
 	}
 
 	// deep copy
+	// not just storing the reference
 	other := &pb.Laptop{}
 	err := copier.Copy(other, laptop)
 	if err != nil {

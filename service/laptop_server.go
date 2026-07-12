@@ -12,22 +12,37 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// This has the actual appln. logic
+// This is the service layer i.e. it is given a req and it has to decide how to res
+
+// This struct defines the concrete type that will implement the gRPC interface.
+// Dependency Injection: a dependency on the storage layer
 type LaptopServer struct {
 	Store LaptopStore
+
+	// Returns an "unimplemented" error for every new added RPC
 	pb.UnimplementedLaptopServiceServer
 }
 
+// Create a new instance of LaptopServer
+// Accepts a laptopStore and return Server instance
 func NewLaptopServer(store LaptopStore) *LaptopServer {
 	return &LaptopServer{Store: store}
 }
 
 // CreateLaptop is a unary RPC to create a new laptop
 func (server *LaptopServer) CreateLaptop(
+
+	// Context: carries request-scoped information liek cancellation, deadlines, metadata etc
 	ctx context.Context,
+	// the req from the client
 	req *pb.CreateLaptopRequest) (*pb.CreateLaptopResponse, error) {
 
+	// Extract the laptop instance from the incoming request
 	laptop := req.GetLaptop()
 	log.Printf("received a create laptop request with id:%s", laptop.Id)
+
+	// Verify laptopID, if no ID->assign one, if invalidID, return error
 	if len(laptop.Id) > 0 {
 		_, err := uuid.Parse(laptop.Id)
 		if err != nil {
