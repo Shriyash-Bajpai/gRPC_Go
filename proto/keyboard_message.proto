@@ -2,7 +2,6 @@ syntax="proto3";
 
 package proto;
 
-import "memory_message.proto";
 
 option go_package="github.com/shriyash/grpc_practice/pb;pb";
 

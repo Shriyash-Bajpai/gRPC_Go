@@ -129,7 +129,7 @@ var File_keyboard_message_proto protoreflect.FileDescriptor
 
 const file_keyboard_message_proto_rawDesc = "" +
 	"\n" +
-	"\x16keyboard_message.proto\x12\x05proto\x1a\x14memory_message.proto\"\x8f\x01\n" +
+	"\x16keyboard_message.proto\x12\x05proto\"\x8f\x01\n" +
 	"\bKeyboard\x12.\n" +
 	"\x06layout\x18\x01 \x01(\x0e2\x16.proto.Keyboard.LayoutR\x06layout\x12\x18\n" +
 	"\abacklit\x18\x02 \x01(\bR\abacklit\"9\n" +
@@ -174,7 +174,6 @@ func file_keyboard_message_proto_init() {
 	if File_keyboard_message_proto != nil {
 		return
 	}
-	file_memory_message_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
