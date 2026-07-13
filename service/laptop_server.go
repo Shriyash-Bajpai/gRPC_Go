@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
 	"github.com/Shriyash-Bajpai/gRPC_Go/pb"
 	"github.com/google/uuid"
@@ -57,7 +56,7 @@ func (server *LaptopServer) CreateLaptop(
 	}
 
 	// some heavy processing to test timeout
-	time.Sleep(6 * time.Second)
+	//time.Sleep(6 * time.Second)
 
 	if err := ctx.Err(); err != nil {
 		log.Printf("ctx.Err() = %v", err)
@@ -84,4 +83,35 @@ func (server *LaptopServer) CreateLaptop(
 		Id: laptop.Id,
 	}
 	return res, nil
+}
+
+func (server *LaptopServer) SearchLaptop(
+	req *pb.SearchLaptopRequest,
+	stream pb.LaptopService_SearchLaptopServer) error {
+
+	filter := req.GetFilter()
+	log.Printf("receive a search-laptop request with filter:%v", filter)
+
+	// some heavy processing
+
+	err := server.Store.Search(
+		stream.Context(),
+		filter,
+		func(laptop *pb.Laptop) error {
+
+			res := &pb.SearchLaptopResponse{Laptop: laptop}
+			err := stream.Send(res)
+			if err != nil {
+				return err
+			}
+
+			log.Printf("sent laptop with id:%s", laptop.GetId())
+			return nil
+		},
+	)
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "unexpected error:%v", err)
+	}
+	return nil
 }

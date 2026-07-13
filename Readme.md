@@ -222,3 +222,8 @@ Sample code to crearte a client:
                 │
         Client receives Response
 ```
+
+
+In this project:
+Unary- Create a laptop in store
+Server Streaming - Search for laptops with a filter in store

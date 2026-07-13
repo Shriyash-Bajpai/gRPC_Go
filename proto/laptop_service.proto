@@ -12,6 +12,7 @@ import "google/protobuf/timestamp.proto";
 option go_package="github.com/shriyash/grpc_practice/pb;pb";
 
 import "laptop_message.proto";
+import "filter_message.proto";
 
 // This is the IDL (Interface Definition Language) for service
 // Explains the data exchanged, RPC methods, the req and res formats
@@ -31,6 +32,16 @@ message CreateLaptopResponse{
   string id=1;
 }
 
+// Define a req which can search for laptop with given specs
+message SearchLaptopRequest{
+  Filter filter=1;
+}
+
+// Define res which returns such laptop
+message SearchLaptopResponse{
+  Laptop laptop=1;
+}
+
 // Defines a general service
 // Interface that the server must implement
 service LaptopService{
@@ -41,4 +52,9 @@ service LaptopService{
   // We also mentioned the input/param of the func and the response type too.
   rpc CreateLaptop(CreateLaptopRequest)
       returns (CreateLaptopResponse){};
+
+  // Creating kind of endpoint for searching laptop
+  rpc SearchLaptop(SearchLaptopRequest)
+      returns (stream SearchLaptopResponse) {};
 }
+

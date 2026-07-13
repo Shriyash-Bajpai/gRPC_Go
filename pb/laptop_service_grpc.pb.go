@@ -20,13 +20,23 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	LaptopService_CreateLaptop_FullMethodName = "/proto.LaptopService/CreateLaptop"
+	LaptopService_SearchLaptop_FullMethodName = "/proto.LaptopService/SearchLaptop"
 )
 
 // LaptopServiceClient is the client API for LaptopService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Defines a general service
+// Interface that the server must implement
 type LaptopServiceClient interface {
+	// rpc declares a remote function that can be called over a network
+	// automatic serialize req, send over n/w, wait, deserialize
+	// This tells: the server provides func named CreateLaptop.
+	// We also mentioned the input/param of the func and the response type too.
 	CreateLaptop(ctx context.Context, in *CreateLaptopRequest, opts ...grpc.CallOption) (*CreateLaptopResponse, error)
+	// Creating kind of endpoint for searching laptop
+	SearchLaptop(ctx context.Context, in *SearchLaptopRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchLaptopResponse], error)
 }
 
 type laptopServiceClient struct {
@@ -47,11 +57,39 @@ func (c *laptopServiceClient) CreateLaptop(ctx context.Context, in *CreateLaptop
 	return out, nil
 }
 
+func (c *laptopServiceClient) SearchLaptop(ctx context.Context, in *SearchLaptopRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchLaptopResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &LaptopService_ServiceDesc.Streams[0], LaptopService_SearchLaptop_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[SearchLaptopRequest, SearchLaptopResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LaptopService_SearchLaptopClient = grpc.ServerStreamingClient[SearchLaptopResponse]
+
 // LaptopServiceServer is the server API for LaptopService service.
 // All implementations must embed UnimplementedLaptopServiceServer
 // for forward compatibility.
+//
+// Defines a general service
+// Interface that the server must implement
 type LaptopServiceServer interface {
+	// rpc declares a remote function that can be called over a network
+	// automatic serialize req, send over n/w, wait, deserialize
+	// This tells: the server provides func named CreateLaptop.
+	// We also mentioned the input/param of the func and the response type too.
 	CreateLaptop(context.Context, *CreateLaptopRequest) (*CreateLaptopResponse, error)
+	// Creating kind of endpoint for searching laptop
+	SearchLaptop(*SearchLaptopRequest, grpc.ServerStreamingServer[SearchLaptopResponse]) error
 	mustEmbedUnimplementedLaptopServiceServer()
 }
 
@@ -64,6 +102,9 @@ type UnimplementedLaptopServiceServer struct{}
 
 func (UnimplementedLaptopServiceServer) CreateLaptop(context.Context, *CreateLaptopRequest) (*CreateLaptopResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateLaptop not implemented")
+}
+func (UnimplementedLaptopServiceServer) SearchLaptop(*SearchLaptopRequest, grpc.ServerStreamingServer[SearchLaptopResponse]) error {
+	return status.Error(codes.Unimplemented, "method SearchLaptop not implemented")
 }
 func (UnimplementedLaptopServiceServer) mustEmbedUnimplementedLaptopServiceServer() {}
 func (UnimplementedLaptopServiceServer) testEmbeddedByValue()                       {}
@@ -104,6 +145,17 @@ func _LaptopService_CreateLaptop_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LaptopService_SearchLaptop_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchLaptopRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LaptopServiceServer).SearchLaptop(m, &grpc.GenericServerStream[SearchLaptopRequest, SearchLaptopResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LaptopService_SearchLaptopServer = grpc.ServerStreamingServer[SearchLaptopResponse]
+
 // LaptopService_ServiceDesc is the grpc.ServiceDesc for LaptopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +168,12 @@ var LaptopService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LaptopService_CreateLaptop_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SearchLaptop",
+			Handler:       _LaptopService_SearchLaptop_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "laptop_service.proto",
 }
