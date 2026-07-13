@@ -22,7 +22,9 @@ func main() {
 
 	// Create a app-specific server that implements RPC
 	// The passing of an interface helps by Dependency Injection
-	laptopServer := service.NewLaptopServer(service.NewInMemoryLaptopStore())
+	laptopStore := service.NewInMemoryLaptopStore()
+	imageStore := service.NewDiskImageStore("img")
+	laptopServer := service.NewLaptopServer(laptopStore, imageStore)
 	// Creates gRPC runtime, just an empty gRPC object
 	grpcServer := grpc.NewServer()
 	// Now we connect the implementation to the gRPC runtime

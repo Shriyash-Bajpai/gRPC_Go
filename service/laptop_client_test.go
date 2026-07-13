@@ -1,9 +1,13 @@
 package service
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"net"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/Shriyash-Bajpai/gRPC_Go/pb"
@@ -18,7 +22,8 @@ import (
 func TestClientCreateLaptop(t *testing.T) {
 	t.Parallel()
 
-	laptopServer, serverAdress := startTestLaptopServer(t, NewInMemoryLaptopStore())
+	laptopStore := NewInMemoryLaptopStore()
+	serverAdress := startTestLaptopServer(t, laptopStore, nil)
 	laptopClient := newTestLaptopClient(t, serverAdress)
 	laptop := sample.NewLaptop()
 	expectedId := laptop.Id
@@ -31,7 +36,7 @@ func TestClientCreateLaptop(t *testing.T) {
 	require.Equal(t, expectedId, res.Id)
 
 	// check if the laptop is really saved
-	other, err := laptopServer.Store.Find(res.Id)
+	other, err := laptopStore.Find(res.Id)
 	require.NoError(t, err)
 	require.NotNil(t, other)
 
@@ -83,7 +88,7 @@ func TestClientSearchLaptop(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	_, serverAdress := startTestLaptopServer(t, store)
+	serverAdress := startTestLaptopServer(t, store, nil)
 	laptopClient := newTestLaptopClient(t, serverAdress)
 
 	req := &pb.SearchLaptopRequest{Filter: filter}
@@ -104,9 +109,9 @@ func TestClientSearchLaptop(t *testing.T) {
 	require.Equal(t, found, len(expectedIds))
 }
 
-func startTestLaptopServer(t *testing.T, store LaptopStore) (*LaptopServer, string) {
+func startTestLaptopServer(t *testing.T, laptopStore LaptopStore, imageStore ImageStore) string {
 
-	laptopServer := NewLaptopServer(store)
+	laptopServer := NewLaptopServer(laptopStore, imageStore)
 	grpcServer := grpc.NewServer()
 
 	pb.RegisterLaptopServiceServer(grpcServer, laptopServer)
@@ -115,7 +120,7 @@ func startTestLaptopServer(t *testing.T, store LaptopStore) (*LaptopServer, stri
 	require.NoError(t, err)
 
 	go grpcServer.Serve(listener)
-	return laptopServer, listener.Addr().String()
+	return listener.Addr().String()
 }
 
 func newTestLaptopClient(t *testing.T, serverAddress string) pb.LaptopServiceClient {
@@ -130,4 +135,71 @@ func requireSameLaptop(t *testing.T, laptop1 *pb.Laptop, laptop2 *pb.Laptop) {
 	json2, err := serializer.ProtoToJSON(laptop2)
 	require.NoError(t, err)
 	require.Equal(t, json1, json2)
+}
+
+func TestClientUploadImage(t *testing.T) {
+	t.Parallel()
+
+	testImageFolder := "../tmp"
+
+	laptopStore := NewInMemoryLaptopStore()
+	imageStore := NewDiskImageStore(testImageFolder)
+
+	laptop := sample.NewLaptop()
+	err := laptopStore.Save(laptop)
+	require.NoError(t, err)
+
+	serverAddress := startTestLaptopServer(t, laptopStore, imageStore)
+	laptopClient := newTestLaptopClient(t, serverAddress)
+
+	imagePath := fmt.Sprintf("%s/laptop.jpg", testImageFolder)
+	file, err := os.Open(imagePath)
+	require.NoError(t, err)
+	defer file.Close()
+
+	stream, err := laptopClient.UploadImage(context.Background())
+	require.NoError(t, err)
+
+	imageType := filepath.Ext(imagePath)
+	req := &pb.UploadImageRequest{
+		Data: &pb.UploadImageRequest_Info{
+			Info: &pb.ImageInfo{
+				LaptopId:  laptop.GetId(),
+				ImageType: imageType,
+			},
+		},
+	}
+	err = stream.Send(req)
+	require.NoError(t, err)
+
+	reader := bufio.NewReader(file)
+	buffer := make([]byte, 1024)
+	size := 0
+
+	for {
+		n, err := reader.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		require.NoError(t, err)
+		size += n
+
+		req := &pb.UploadImageRequest{
+			Data: &pb.UploadImageRequest_ChunkData{
+				ChunkData: buffer[:n],
+			},
+		}
+		err = stream.Send(req)
+		require.NoError(t, err)
+	}
+
+	res, err := stream.CloseAndRecv()
+	require.NoError(t, err)
+
+	require.NotZero(t, res.GetId())
+	require.EqualValues(t, res.GetSize(), size)
+
+	savedImagePath := fmt.Sprintf("%s/%s%s", testImageFolder, res.GetId(), imageType)
+	require.FileExists(t, savedImagePath)
+	require.NoError(t, os.Remove(savedImagePath))
 }
