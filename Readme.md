@@ -227,3 +227,180 @@ Sample code to crearte a client:
 In this project:
 Unary- Create a laptop in store
 Server Streaming - Search for laptops with a filter in store
+
+
+
+# gRPC Go Quick Reference
+
+## Server Setup
+
+```go
+type Server struct {
+    pb.UnimplementedLaptopServiceServer
+}
+
+grpcServer := grpc.NewServer()
+pb.RegisterLaptopServiceServer(grpcServer, &Server{})
+
+listener, _ := net.Listen("tcp", ":50051")
+grpcServer.Serve(listener)
+```
+
+---
+
+## Client Setup
+
+```go
+conn, _ := grpc.Dial("localhost:50051", grpc.WithInsecure())
+client := pb.NewLaptopServiceClient(conn)
+```
+
+---
+
+# Unary RPC
+
+## Client (Send Request)
+
+```go
+res, err := client.Method(ctx, req)
+```
+
+## Server (Receive Request & Send Response)
+
+```go
+func (s *Server) Method(
+    ctx context.Context,
+    req *pb.Request,
+) (*pb.Response, error) {
+
+    return &pb.Response{}, nil
+}
+```
+
+---
+
+# Server Streaming RPC
+
+## Client (Receive Stream)
+
+```go
+stream, err := client.Method(ctx, req)
+
+for {
+    res, err := stream.Recv()
+    if err == io.EOF {
+        break
+    }
+}
+```
+
+## Server (Receive Unary Request)
+
+```go
+func (s *Server) Method(
+    req *pb.Request,
+    stream pb.Service_MethodServer,
+) error {
+```
+
+## Server (Send Stream)
+
+```go
+for {
+    stream.Send(res)
+}
+
+return nil
+```
+
+---
+
+# Client Streaming RPC
+
+## Client (Open Stream)
+
+```go
+stream, err := client.Method(ctx)
+```
+
+## Client (Send Stream)
+
+```go
+stream.Send(req)
+stream.Send(req)
+stream.Send(req)
+```
+
+## Client (Close & Receive Response)
+
+```go
+res, err := stream.CloseAndRecv()
+```
+
+## Server (Receive Stream)
+
+```go
+func (s *Server) Method(
+    stream pb.Service_MethodServer,
+) error {
+
+    for {
+        req, err := stream.Recv()
+        if err == io.EOF {
+            break
+        }
+    }
+
+    return stream.SendAndClose(&pb.Response{})
+}
+```
+
+---
+
+# Bidirectional Streaming RPC
+
+## Client (Open Stream)
+
+```go
+stream, err := client.Method(ctx)
+```
+
+## Client (Send)
+
+```go
+stream.Send(req)
+```
+
+## Client (Receive)
+
+```go
+res, err := stream.Recv()
+```
+
+> Typically, receiving runs in a separate goroutine while sending continues.
+
+## Client (Close Sending)
+
+```go
+stream.CloseSend()
+```
+
+## Server (Receive & Send)
+
+```go
+func (s *Server) Method(
+    stream pb.Service_MethodServer,
+) error {
+
+    for {
+        req, err := stream.Recv()
+        if err == io.EOF {
+            break
+        }
+
+        stream.Send(res)
+    }
+
+    return nil
+}
+```
