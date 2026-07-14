@@ -59,6 +59,18 @@ message UploadImageResponse{
   uint32 size=2;
 }
 
+message RateLaptopRequest{
+  string laptop_id=1;
+  double score=2;
+}
+
+message RateLaptopResponse{
+  string laptop_id=1;
+  uint32 rated_count=2;
+  double average_score=3;
+}
+
+
 // Defines a general service
 // Interface that the server must implement
 service LaptopService{
@@ -76,5 +88,8 @@ service LaptopService{
 
   rpc UploadImage(stream UploadImageRequest)
       returns (UploadImageResponse){};
+
+  rpc RateLaptop(stream RateLaptopRequest)
+      returns (stream RateLaptopResponse){};
 }
 

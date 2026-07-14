@@ -24,6 +24,7 @@ const maxImageSize = 1 << 20
 type LaptopServer struct {
 	LaptopStore LaptopStore
 	ImageStore  ImageStore
+	RatingStore RatingStore
 
 	// Returns an "unimplemented" error for every new added RPC
 	pb.UnimplementedLaptopServiceServer
@@ -31,8 +32,8 @@ type LaptopServer struct {
 
 // Create a new instance of LaptopServer
 // Accepts a laptopStore and return Server instance
-func NewLaptopServer(laptopStore LaptopStore, imageStore ImageStore) *LaptopServer {
-	return &LaptopServer{LaptopStore: laptopStore, ImageStore: imageStore}
+func NewLaptopServer(laptopStore LaptopStore, imageStore ImageStore, ratingStore RatingStore) *LaptopServer {
+	return &LaptopServer{LaptopStore: laptopStore, ImageStore: imageStore, RatingStore: ratingStore}
 }
 
 // CreateLaptop is a unary RPC to create a new laptop
@@ -212,4 +213,51 @@ func logError(err error) error {
 		log.Print(err)
 	}
 	return err
+}
+
+func (server *LaptopServer) RateLaptop(stream pb.LaptopService_RateLaptopServer) error {
+
+	for {
+		err := contextError(stream.Context())
+		if err != nil {
+			return err
+		}
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Printf("end of file")
+			break
+		}
+		if err != nil {
+			return logError(status.Errorf(codes.Unknown, "cannot receive stream request:%v", err))
+		}
+
+		laptopID := req.GetLaptopId()
+		score := req.GetScore()
+
+		log.Printf("received a rate-laptop request:id=%s, score=%.2f", laptopID, score)
+
+		found, err := server.LaptopStore.Find(laptopID)
+		if err != nil {
+			return logError(status.Errorf(codes.Internal, "cannot find laptop:%v", err))
+		}
+		if found == nil {
+			return logError(status.Errorf(codes.NotFound, "laptopID %s not found", laptopID))
+		}
+
+		rating, err := server.RatingStore.Add(laptopID, score)
+		if err != nil {
+			return logError(status.Errorf(codes.Internal, "cannot add rating to the store:%v", err))
+		}
+		res := &pb.RateLaptopResponse{
+			LaptopId:     laptopID,
+			RatedCount:   rating.Count,
+			AverageScore: rating.Sum / float64(rating.Count),
+		}
+
+		err = stream.Send(res)
+		if err != nil {
+			return logError(status.Errorf(codes.Unknown, "cannot send the stream response:%v", err))
+		}
+	}
+	return nil
 }

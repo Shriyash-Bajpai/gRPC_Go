@@ -24,7 +24,8 @@ func main() {
 	// The passing of an interface helps by Dependency Injection
 	laptopStore := service.NewInMemoryLaptopStore()
 	imageStore := service.NewDiskImageStore("img")
-	laptopServer := service.NewLaptopServer(laptopStore, imageStore)
+	ratingStore := service.NewInMemoryRatingStore()
+	laptopServer := service.NewLaptopServer(laptopStore, imageStore, ratingStore)
 	// Creates gRPC runtime, just an empty gRPC object
 	grpcServer := grpc.NewServer()
 	// Now we connect the implementation to the gRPC runtime
